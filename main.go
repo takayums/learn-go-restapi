@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"html/template"
 	"net/http"
+	"path"
 )
 
 func handleIndex(w http.ResponseWriter, r *http.Request) {
@@ -22,6 +24,26 @@ func main() {
 	// Routing
 	http.HandleFunc("/", handleIndex)
 	http.HandleFunc("/index", handleHello)
+
+	http.HandleFunc("/home", func(w http.ResponseWriter, r *http.Request) {
+		// Rendering HTML
+		filepath := path.Join("views", "index.html")
+		tmpl, err := template.ParseFiles(filepath)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		data := map[string]interface{}{
+			"title": "Learning Golang Web",
+			"name":  "Asraf",
+		}
+
+		err = tmpl.Execute(w, data)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	})
 
 	address := "localhost:9000"
 	fmt.Printf("server running on %s is yes\n", address)
