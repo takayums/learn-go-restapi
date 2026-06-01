@@ -16,6 +16,10 @@ func handleHello(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	// Static Assets
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("assets"))))
+
+	// Routing
 	http.HandleFunc("/", handleIndex)
 	http.HandleFunc("/index", handleHello)
 
