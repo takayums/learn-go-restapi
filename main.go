@@ -1,54 +1,45 @@
 package main
 
 import (
-	"fmt"
 	"html/template"
+	"log"
 	"net/http"
-	"path"
 )
 
-func handleIndex(w http.ResponseWriter, r *http.Request) {
-	message := "Welcome"
-	w.Write([]byte(message))
-}
-
-func handleHello(w http.ResponseWriter, r *http.Request) {
-	message := "Hello World"
-	w.Write([]byte(message))
-}
+type M map[string]any
 
 func main() {
-	// Static Assets
-	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("assets"))))
-
 	// Routing
-	http.HandleFunc("/", handleIndex)
-	http.HandleFunc("/index", handleHello)
+	http.HandleFunc("/index", func(w http.ResponseWriter, r *http.Request) {
+		data := M{"name": "Asraf"}
+		tmpl := template.Must(template.ParseFiles(
+			"views/index.html",
+			"views/_header.html",
+			"views/_message.html",
+		))
 
-	http.HandleFunc("/home", func(w http.ResponseWriter, r *http.Request) {
-		// Rendering HTML
-		filepath := path.Join("views", "index.html")
-		tmpl, err := template.ParseFiles(filepath)
+		err := tmpl.ExecuteTemplate(w, "index", data)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
 		}
-
-		data := map[string]interface{}{
-			"title": "Learning Golang Web",
-			"name":  "Asraf",
-		}
-
-		err = tmpl.Execute(w, data)
+	})
+	http.HandleFunc("/about", func(w http.ResponseWriter, r *http.Request) {
+		data := M{"name": "Asraf"}
+		tmpl := template.Must(template.ParseFiles(
+			"views/about.html",
+			"views/_header.html",
+			"views/_message.html",
+		))
+		err := tmpl.ExecuteTemplate(w, "about", data)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	})
 
 	address := "localhost:9000"
-	fmt.Printf("server running on %s is yes\n", address)
+	log.Println("server running on localhost:9000")
 	err := http.ListenAndServe(address, nil)
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Fatal(err)
 	}
 }
